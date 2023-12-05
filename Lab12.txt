@@ -1,0 +1,117 @@
+.orig x3100
+
+
+;Resetting registers
+AND R0, R0, #0;	TRAPs
+AND R1, R1, #0;	BIT_STRING
+AND R2, R2, #0;	NOTHING
+AND R3, R3, #0;	TEN
+AND R4, R4, #0;	CHECK
+AND R5, R5, #0;	Counter for ones
+AND R6, R6, #0;	Counter for 16
+AND R7, R7, #0;	NOTHING
+
+ADD, R6, R6, #8; Counter
+ADD, R6, R6, #8; Counter
+
+LEA, R0, PROMPT; Loads prompt into R0
+PUTS; Prints R0 to console
+
+LEA, R1, BIT_STRING; Loads location BIT_STRING into R1
+
+STRING_LOOP
+    	GETC; Gets 1 input from keyboard
+    	OUT; Prints value of R0
+    	STR, R0, R1, #0; Stores keyboard input to R1
+    	ADD, R1, R1, #1; Goes to the next bit in BIT_STRING
+    	ADD, R6, R6, #-1; Decrement Counter
+    	BRp STRING_LOOP; As long as counter is positive
+    	BRnzp NEXTSTEP
+
+NEXTSTEP
+	AND R6, R6, #0; Reset Counter
+	ADD, R6, R6, #8; Counter
+	ADD, R6, R6, #9; Counter add 17
+
+COUNTONES
+    	LDR, R2, R1, #0; Stores keyboard input to R2
+    	AND, R2, R2, #1; checking if 1 or 0
+    	BRz ZERO; if not zero, then move on
+    	ADD, R5, R5, #1; Count for ones +1 if 1
+    	ADD, R1, R1, #-1; Iterate 1 step through BIT_STRING
+    	ADD, R6, R6, #-1; Decrement Counter
+    	BRp COUNTONES
+    	BRz SUM
+    
+ZERO
+	ADD, R1, R1, #-1; Iterate 1 step through BIT_STRING
+    	ADD, R6, R6, #-1; Decrement Counter
+    	BRp COUNTONES
+    	BRnzp SUM
+
+SUM
+	ST, R5, NUM_ONES; Loading R5 into R0
+	BRnzp ANSWER
+
+ANSWER
+	LD, R0, NEWLINE; 
+	OUT;
+	LEA, R0, PROMPT2; 
+	PUTS;
+	LEA, R0, BIT_STRING
+	PUTS;
+	
+	LEA, R0, PROMPT3; 
+	PUTS;
+	
+	AND, R3, R3, #0
+	ADD, R3, R3, #-10
+	
+	ADD, R4, R5, R3; Storing R5 - #10
+	BRn, BELOW9
+	BRp, ABOVE9
+
+BELOW9
+	ADD, R5, R5, #12
+	ADD, R5, R5, #12
+	ADD, R5, R5, #12
+	ADD, R5, R5, #12
+	ST, R5, ANS	
+	LEA, R0, ANS
+	PUTS;
+	HALT
+	
+ABOVE9
+	; PRINT ASCII 1, then subtract 10 from R5, and add #48, Then print R5
+	AND, R0, R0, #0
+	ADD, R0, R0, #12
+	ADD, R0, R0, #12
+	ADD, R0, R0, #12
+	ADD, R0, R0, #13; R0 = 49 = 1
+	ST, R0, ANS
+	LEA, R0, ANS
+	PUTS; //Print's ASCII 1
+
+	AND, R0, R0, #0; resetting R0
+	ADD, R5, R3, R5; R5 = R5 - 10 
+	ADD, R5, R5, #12
+	ADD, R5, R5, #12
+	ADD, R5, R5, #12
+	ADD, R5, R5, #12; ADDS 48 to get ASCII Value
+	ST, R5, ANS
+	LEA, R0, ANS
+	PUTS
+
+	HALT
+
+PROMPT .STRINGZ "Enter a 16-bit string: "
+PROMPT2 .STRINGZ "You Entered: "
+PROMPT3 .STRINGZ "Number of 1s in your input is: "
+BIT_STRING .BLKW #16
+NEWLINE .FILL x000A
+NUM_ONES .BLKW #1
+TEN .BLKW #1
+ANS .BLKW #1
+
+
+.end
