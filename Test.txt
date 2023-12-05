@@ -117,8 +117,9 @@ GOOD
 	; Turn ASCII value into an integer
 	ADD, R6, R0, R6; Adds integer value to SUM register = R6
 	AND, R3, R0, #1; Checks if odd. If P then odd, if Z then even.
-	BRz, #1; if even, skips adding to register. If odd continue.
+	BRz, #1; if even, skips one line. If odd continue.
 	ADD, R4, R0, R4; Add integer value to ODD register = R4
+	ADD, R2, R0, R2; ; Adds value to EVEN register = R2
 	RET
 
 DONE

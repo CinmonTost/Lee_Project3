@@ -1,0 +1,13 @@
+Put at the end of OUTPUT:
+
+TENTHS
+	ADD, R4, R4, #1; increment counter
+	ADD, R1, R1, R5; adds #-10 to R1
+	
+	BRp TENTHS
+	LD, R5, NEG_10; R5 = #-10
+	BRnz ONES
+
+ONES
+	ADD, R6, R6, #1; increment counter
+	BRnzp DONE
