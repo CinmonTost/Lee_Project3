@@ -1,49 +1,120 @@
-.orig x3000 ;do R[i] - #10 to check if ascii value is < 10
+;Write an LC-3 assembly program that will retrieve 5 digits from the keyboard.
+; R0 = TRAPS
+; R1 = Counter for loop
+; R2 = Value of 48 ASCII mask to get int value. 
+; R3 = 
+; R4 = ODD, you can get EVEN = SUM - ODD (R3 - R4)
+; R5 = 
+; R6 = SUM
+; R7 = 
+
+.orig x3000; start at x3000
+	LD R2, ZERO
+
+	LEA R0, PROMPT
+	PUTS
+
+	LD R1, COUNT	; initialize counter R1
+
+AGAIN 	
+	BRz DONE
+	; loop body
+	LD R0, 	NEWLINE
+	OUT
+	LD R0, 	LEFTSQBR
+	OUT
+	ADD R0, R2, #1
+	OUT
+	LD R0, 	RIGHTSQBR
+	OUT
+	LD R0, 	COLON
+	OUT
+
+	;Printing out [i]: 
+
+	GETC; getting keyboard input loads into R0
+	OUT; Printing keyboard input
+	
+	JSR VALIDATE; jump to subroutine VALIDATE
+	ADD R5, R5, #0	; set CC based on R5
+	BRp NO_GOOD
+
+	ADD R2, R2, #1; Printed number increases
+	ADD R1, R1 #-1; Decrement counter for loop
+	BRnzp AGAIN
+
+NO_GOOD 
+	LD R0, 	NEWLINE
+	OUT
+	LEA R0, ERROR
+	PUTS
+	ADD R1, R1, #0
+	BRnzp AGAIN
+
+DONE 
+
+	ST, R6, SUM; Stores SUM
+	ST, R4, ODD; Stores ODD
+	NOT, R5, R4;
+	ADD, R5, R5, #1; gets two's complement of odd so you can subtract
+	ADD, R5, R6, R5; Stores EVEN
+	ST, R5, EVEN
+	HALT
+
+;	Pre-condition: R0 has an ASCII character
+;	Post-condition: R5 = 0 if R0 contains a digit
+;	R5 = 1 if R0 contains a non-digit
+
+VALIDATE	
+	ST R7, VSAVE_R7
+	ST R1, VSAVE_R1
+	
+	AND R5, R5, #0	; Resetting R5
+
+	LD R1, NEG_0
+	ADD R1, R0, R1; checking whether value is >= 0. If less than 0, then flag will be negative
+	BRn BAD
+	LD R1, NEG_9
+	ADD R1, R0, R1; checking whether value is <= 9. If greater than 9, then flag will be positive
+	BRp BAD
+	BRnzp GOOD; passes the checks
+
+BAD	
+	ADD R5, R5, #1; sets flag to P to branch to NO_GOOD
+GOOD	
+	LD R7, VSAVE_R7
+	LD R1, VSAVE_R1
+	ADD, R0, R0, #-16
+	ADD, R0, R0, #-16
+	ADD, R0, R0, #-16; ASCII MASK
+	; Turn ASCII value into an integer
+	ADD, R6, R0, R6; Adds integer value to SUM register = R6
+	AND, R3, R0, #1; Checks if odd. If P then odd, if Z then even.
+	BRz, #1; if even, skips adding to register. If odd continue.
+	ADD, R4, R0, R4; Add integer value to ODD register = R4
+	RET
+
+ERROR .stringz "Invalid input. Input between 0 - 9. Try again..."
+PROMPT .stringz "Enter 5 digits... "
+SUM_PROMPT .stringz  "Sum of all inputs values = "
+ODD_PROMPT .stringz "Sum of all odd input values = "
+EVEN_PROMPT .stringz "Sum of all even input values = "
+
+LEFTSQBR .fill x005B
+RIGHTSQBR .fill x005D
+COLON .fill x003A
+NEWLINE .fill x000A
+COUNT .fill #5
+ZERO .fill x0030
  
-    ;Resetting registers
-    AND, R0, R0, #0; TRAPS
-    AND, R1, R1, #0; CHECK FOR VALUE
-    AND, R2, R2, #0; CONVERT TO ASCII (add 48)
-    AND, R3, R3, #0; SUM
-    AND, R4, R4, #0; ODD
-    AND, R5, R5, #0; EVEN
-    AND, R6, R6, #0; COUNTER
-    AND, R7, R7, #0;
-
-    ADD, R6, R6, #5;
-    ST, R6, COUNTER;
-
-USER
-    LEA, R0, PROMPT
-    PUTS
-    LEA, R0, NEWLINE
-    OUTS
-    GETC; Get input from keyboard
-    OUT
-    ST, R0, NUM; gets 1st input
-    BRnzp CHECK
-    ADD, R6, R6, #-1
-    BRz FINISH
-
-CHECK
-    ADD, R1, R0, #-10
-    BRzp ERROR
-    ADD, R3, R0, #0; SUM
-    ST,     
-
-ERROR  
-    LEA, R0, ERROR
-    PUTS;
-    BRnzp USER
-
-FINISH
-    HALT
-NUM .blkw #1
 SUM .blkw #1
-ODD .blkw #1
 EVEN .blkw #1
-PROMPT .stringz "Enter 5 digits: "
-ERRORMSG .stringz "Invalid Input. Try Again." 
-NEWLINE .FILL x000A
-COUNTER .blkw #1
+ODD .blkw #1
+
+NEG_0 .fill #-48
+NEG_9 .fill #-57
+VSAVE_R7 .blkw #1
+VSAVE_R1 .blkw #1
+
+
 .end
