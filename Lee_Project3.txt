@@ -1,0 +1,49 @@
+.orig x3000 ;do R[i] - #10 to check if ascii value is < 10
+ 
+    ;Resetting registers
+    AND, R0, R0, #0; TRAPS
+    AND, R1, R1, #0; CHECK FOR VALUE
+    AND, R2, R2, #0; CONVERT TO ASCII (add 48)
+    AND, R3, R3, #0; SUM
+    AND, R4, R4, #0; ODD
+    AND, R5, R5, #0; EVEN
+    AND, R6, R6, #0; COUNTER
+    AND, R7, R7, #0;
+
+    ADD, R6, R6, #5;
+    ST, R6, COUNTER;
+
+USER
+    LEA, R0, PROMPT
+    PUTS
+    LEA, R0, NEWLINE
+    OUTS
+    GETC; Get input from keyboard
+    OUT
+    ST, R0, NUM; gets 1st input
+    BRnzp CHECK
+    ADD, R6, R6, #-1
+    BRz FINISH
+
+CHECK
+    ADD, R1, R0, #-10
+    BRzp ERROR
+    ADD, R3, R0, #0; SUM
+    ST,     
+
+ERROR  
+    LEA, R0, ERROR
+    PUTS;
+    BRnzp USER
+
+FINISH
+    HALT
+NUM .blkw #1
+SUM .blkw #1
+ODD .blkw #1
+EVEN .blkw #1
+PROMPT .stringz "Enter 5 digits: "
+ERRORMSG .stringz "Invalid Input. Try Again." 
+NEWLINE .FILL x000A
+COUNTER .blkw #1
+.end
