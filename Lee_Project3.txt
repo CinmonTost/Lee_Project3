@@ -115,53 +115,38 @@ OUTPUT_SUM
 	LD, R5, NEG_10; R5 = #-10
 	LD, R2, NEG_1;
 	AND, R4, R4, #0; Reset R4 for counter
-	ADD, R4, R4, #-1; Counter start = #-1
+	ADD, R4, R4, #0; Counter start = #0
 	AND, R6, R6, #0; Reset R6 for counter
 
 TENTHS_SUM
 	ADD, R4, R4, #1; Counter++
 	ADD, R1, R5, R1; SUM - 10
 	BRp TENTHS_SUM; Loops until all tenths are gone
-	BRz ONES_SUM
+	BRz PRINT_SUM
 	BRn FIX_SUM
 ; R4 now has tenths values
 
 FIX_SUM	
-	ADD, R1, R1, #10
+	ADD, R1, R1, #10 ; R1 has ONES value
+	ADD, R4, R4, #-1
 
-	BRnzp ONES_SUM
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-ONES_SUM ; Just print the number no need to use counter and conversion
-	ADD, R6, R6, #1; Counter++
-	ADD, R1, R2, R1; SUM - 1
-	BRp ONES_SUM
-
-;R6 now has ones values
 	BRnzp PRINT_SUM
-
-;Pre-condition: R0 has an ASCII character
-;Post-condition: R5 = 0 if R0 contains a digit
-;R5 = 1 if R0 contains a non-digit
-
-
 
 PRINT_SUM
 	ADD, R4, R4, #12
 	ADD, R4, R4, #12
 	ADD, R4, R4, #12
 	ADD, R4, R4, #12; ASCII value of TENTHS
-	ADD, R6, R6, #12
-	ADD, R6, R6, #12
-	ADD, R6, R6, #12
-	ADD, R6, R6, #12; ASCII value of ONES
+	ADD, R1, R1, #12
+	ADD, R1, R1, #12
+	ADD, R1, R1, #12
+	ADD, R1, R1, #12; ASCII value of ONES
 	ST, R4, SUM;
 	LEA, R0, SUM_PROMPT
 	PUTS
 	LD, R0, SUM;
 	OUT
-	ST, R6, SUM
+	ST, R1, SUM
 	LD, R0, SUM
 	OUT
 	LD R0, 	NEWLINE
@@ -170,57 +155,47 @@ PRINT_SUM
 	BRnzp OUTPUT_ODD
 
 OUTPUT_ODD
-	
 	LD, R1, ODD
 	LD, R5, NEG_10; R5 = #-10
 	LD, R2, NEG_1;
 	AND, R4, R4, #0; Reset R4 for counter
-	ADD, R4, R4, #-1; Counter start = #-1
+	ADD, R4, R4, #0; Counter start = #0
 	AND, R6, R6, #0; Reset R6 for counter
 
 TENTHS_ODD
 	ADD, R4, R4, #1; Counter++
 	ADD, R1, R5, R1; ODD - 10
 	BRp TENTHS_ODD; Loops until all tenths are gone
-	BRz ONES_ODD
+	BRz PRINT_ODD
 	BRn FIX_ODD
 ; R4 now has tenths values
 
 FIX_ODD	
-	ADD, R1, R1, #10
+	ADD, R1, R1, #10 ; R1 has ONES value
+	ADD, R4, R4, #-1
 
-	BRnzp ONES_ODD
-
-ONES_ODD
-	ADD, R6, R6, #1; Counter++
-	ADD, R1, R2, R1; ODD - 1
-	BRp ONES_ODD
-
-;R6 now has ones values
 	BRnzp PRINT_ODD
 
 PRINT_ODD
-; at this point R4 = correct tenths values 
-; at this point R6 = correct ones values
 	ADD, R4, R4, #12
 	ADD, R4, R4, #12
 	ADD, R4, R4, #12
 	ADD, R4, R4, #12; ASCII value of TENTHS
-	ADD, R6, R6, #12
-	ADD, R6, R6, #12
-	ADD, R6, R6, #12
-	ADD, R6, R6, #12; ASCII value of ONES
+	ADD, R1, R1, #12
+	ADD, R1, R1, #12
+	ADD, R1, R1, #12
+	ADD, R1, R1, #12; ASCII value of ONES
+	ST, R4, ODD;
 	LEA, R0, ODD_PROMPT
 	PUTS
-	ST, R4, ODD;
 	LD, R0, ODD;
 	OUT
-	ST, R6, ODD
+	ST, R1, ODD
 	LD, R0, ODD
 	OUT
-	LD, R0, NEWLINE
-	OUT;
-	OUT;
+	LD R0, 	NEWLINE
+	OUT
+	OUT
 	BRnzp OUTPUT_EVEN
 
 OUTPUT_EVEN
@@ -229,28 +204,21 @@ OUTPUT_EVEN
 	LD, R5, NEG_10; R5 = #-10
 	LD, R2, NEG_1;
 	AND, R4, R4, #0; Reset R4 for counter
-	ADD, R4, R4, #-1; Counter start = #-1
+	ADD, R4, R4, #0; Counter start = #0
 	AND, R6, R6, #0; Reset R6 for counter
 
 TENTHS_EVEN
 	ADD, R4, R4, #1; Counter++
 	ADD, R1, R5, R1; EVEN - 10
 	BRp TENTHS_EVEN; Loops until all tenths are gone
-	BRz ONES_EVEN
+	BRz PRINT_EVEN
 	BRn FIX_EVEN
 ; R4 now has tenths values
 
 FIX_EVEN	
-	ADD, R1, R1, #10
+	ADD, R1, R1, #10 ; R1 has ONES value
+	ADD, R4, R4, #-1
 
-	BRnzp ONES_EVEN
-
-ONES_EVEN
-	ADD, R6, R6, #0; Counter++
-	ADD, R1, R2, R1; EVEN - 1
-	BRp ONES_EVEN
-
-;R6 now has ones values
 	BRnzp PRINT_EVEN
 
 PRINT_EVEN
@@ -258,20 +226,19 @@ PRINT_EVEN
 	ADD, R4, R4, #12
 	ADD, R4, R4, #12
 	ADD, R4, R4, #12; ASCII value of TENTHS
-	ADD, R6, R6, #12
-	ADD, R6, R6, #12
-	ADD, R6, R6, #12
-	ADD, R6, R6, #12; ASCII value of ONES
+	ADD, R1, R1, #12
+	ADD, R1, R1, #12
+	ADD, R1, R1, #12
+	ADD, R1, R1, #12; ASCII value of ONES
 	ST, R4, EVEN;
-	AND, R0, R0, #0; Reset R0
 	LEA, R0, EVEN_PROMPT
 	PUTS
-	AND, R0, R0, #0; Reset R0
 	LD, R0, EVEN;
 	OUT
-	ST, R6, EVEN
-	AND, R0, R0, #0; Reset R0
+	ST, R1, EVEN
 	LD, R0, EVEN
+	OUT
+	LD R0, 	NEWLINE
 	OUT
 	BRnzp DONE
 
