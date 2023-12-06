@@ -17,7 +17,7 @@
 	LD R1, COUNT	; initialize counter R1
 
 AGAIN 	
-	BRz OUTPUT
+	BRz OUTPUT_SUM
 	; loop body
 	LD R0, 	NEWLINE
 	OUT
@@ -52,46 +52,6 @@ NO_GOOD
 	ADD R1, R1, #0
 	BRnzp AGAIN
 
-OUTPUT 
-	LD, R0, NEWLINE
-	OUT
-	OUT
-	ST, R6, SUM; Stores SUM
-	ST, R4, ODD; Stores ODD
-	NOT, R5, R4;
-	ADD, R5, R5, #1; gets two's complement of odd so you can subtract
-	ADD, R5, R6, R5; Stores EVEN
-	ST, R5, EVEN
-
-; At this point, SUM, ODD, and EVEN have the correct integer values. 
-; All registers besides R0 and R7 are usable.
-; TEST: Use AND to zero out ones place to get tenths place value
-
-	LD, R1, SUM
-	LD, R2, ODD
-	LD, R3, EVEN
-	LD, R5, NEG_10; R5 = #-10
-	AND, R4, R4, #0; Reset R4 for counter
-	AND, R6, R6, #0; Reset R6 for counter
-	ADD, R4, R4, #12;
-	ADD, R4, R4, #12;
-	ADD, R4, R4, #12;
-	ADD, R4, R4, #12; Convert to ASCII 0
-	ADD, R6, R6, #12;
-	ADD, R6, R6, #12;
-	ADD, R6, R6, #12;
-	ADD, R6, R6, #12; Convert to ASCII 0
-
-	LEA, R0, SUM_PROMPT
-	PUTS;
-	LEA, R0, SUM
-	OUT;
-	BRnzp DONE
-
-;Pre-condition: R0 has an ASCII character
-;Post-condition: R5 = 0 if R0 contains a digit
-;R5 = 1 if R0 contains a non-digit
-
 VALIDATE	
 	ST R7, VSAVE_R7
 	ST R1, VSAVE_R1
@@ -105,6 +65,9 @@ VALIDATE
 	ADD R1, R0, R1; checking whether value is <= 9. If greater than 9, then flag will be positive
 	BRp BAD
 	BRnzp GOOD; passes the checks
+
+VSAVE_R7 .blkw #1
+VSAVE_R1 .blkw #1
 
 BAD	
 	ADD R5, R5, #1; sets flag to P to branch to NO_GOOD
@@ -121,21 +84,195 @@ GOOD
 	ADD, R4, R0, R4; Add integer value to ODD register = R4
 	RET
 
-DONE
-	HALT
-
-ERROR .stringz "Invalid input. Input between 0 - 9. Try again..."
-PROMPT .stringz "Enter 5 digits... "
-SUM_PROMPT .stringz  "Sum of all inputs values = "
-ODD_PROMPT .stringz "Sum of all odd input values = "
-EVEN_PROMPT .stringz "Sum of all even input values = "
-
 LEFTSQBR .fill x005B
 RIGHTSQBR .fill x005D
 COLON .fill x003A
 NEWLINE .fill x000A
 COUNT .fill #5
 ZERO .fill x0030
+
+ERROR .stringz "Invalid input. Input between 0 - 9. Try again..."
+PROMPT .stringz "Enter 5 digits... "
+
+OUTPUT_SUM 
+	LD, R0, NEWLINE
+	OUT
+	OUT
+	ST, R6, SUM; Stores SUM
+	ST, R4, ODD; Stores ODD
+	NOT, R5, R4;
+	ADD, R5, R5, #1; gets two's complement of odd so you can subtract
+	ADD, R5, R6, R5; Stores EVEN
+	ST, R5, EVEN
+
+; At this point, SUM, ODD, and EVEN have the correct integer values. 
+; All registers besides R0 and R7 are usable.
+; Start your counter at #-1 for tenths place
+
+	LD, R1, SUM
+	LD, R5, NEG_10; R5 = #-10
+	LD, R2, NEG_1;
+	AND, R4, R4, #0; Reset R4 for counter
+	ADD, R4, R4, #-1; Counter start = #-1
+	AND, R6, R6, #0; Reset R6 for counter
+
+TENTHS_SUM
+	ADD, R4, R4, #1; Counter++
+	ADD, R1, R5, R1; SUM - 10
+	BRp TENTHS_SUM; Loops until all tenths are gone
+	BRz ONES_SUM
+	BRn FIX_SUM
+; R4 now has tenths values
+
+FIX_SUM	
+	ADD, R1, R1, #10
+
+	BRnzp ONES_SUM
+
+ONES_SUM
+	ADD, R6, R6, #1; Counter++
+	ADD, R1, R2, R1; SUM - 1
+	BRp ONES_SUM
+
+;R6 now has ones values
+	BRnzp PRINT_SUM
+
+;Pre-condition: R0 has an ASCII character
+;Post-condition: R5 = 0 if R0 contains a digit
+;R5 = 1 if R0 contains a non-digit
+
+
+
+PRINT_SUM
+	ADD, R4, R4, #12
+	ADD, R4, R4, #12
+	ADD, R4, R4, #12
+	ADD, R4, R4, #12; ASCII value of TENTHS
+	ADD, R6, R6, #12
+	ADD, R6, R6, #12
+	ADD, R6, R6, #12
+	ADD, R6, R6, #12; ASCII value of ONES
+	ST, R4, SUM;
+	LEA, R0, SUM_PROMPT
+	PUTS
+	LEA, R0, SUM;
+	PUTS
+	ST, R6, SUM
+	LEA, R0, SUM
+	PUTS
+	LD R0, 	NEWLINE
+	OUT
+	OUT
+	BRnzp OUTPUT_ODD
+
+OUTPUT_ODD
+	
+	LD, R1, ODD
+	LD, R5, NEG_10; R5 = #-10
+	LD, R2, NEG_1;
+	AND, R4, R4, #0; Reset R4 for counter
+	ADD, R4, R4, #-1; Counter start = #-1
+	AND, R6, R6, #0; Reset R6 for counter
+
+TENTHS_ODD
+	ADD, R4, R4, #1; Counter++
+	ADD, R1, R5, R1; ODD - 10
+	BRp TENTHS_ODD; Loops until all tenths are gone
+	BRz ONES_ODD
+	BRn FIX_ODD
+; R4 now has tenths values
+
+FIX_ODD	
+	ADD, R1, R1, #10
+
+	BRnzp ONES_ODD
+
+ONES_ODD
+	ADD, R6, R6, #1; Counter++
+	ADD, R1, R2, R1; ODD - 1
+	BRp ONES_ODD
+
+;R6 now has ones values
+	BRnzp PRINT_ODD
+
+PRINT_ODD
+; at this point R4 = correct tenths values 
+; at this point R6 = correct ones values
+	ADD, R4, R4, #12
+	ADD, R4, R4, #12
+	ADD, R4, R4, #12
+	ADD, R4, R4, #12; ASCII value of TENTHS
+	ADD, R6, R6, #12
+	ADD, R6, R6, #12
+	ADD, R6, R6, #12
+	ADD, R6, R6, #12; ASCII value of ONES
+	LEA, R0, ODD_PROMPT
+	PUTS
+	ST, R4, ODD;
+	LD, R0, ODD;
+	OUT
+	ST, R6, ODD
+	LD, R0, ODD
+	OUT
+	LD, R0, NEWLINE
+	OUT;
+	OUT;
+	BRnzp OUTPUT_EVEN
+
+OUTPUT_EVEN
+	
+	LD, R1, EVEN
+	LD, R5, NEG_10; R5 = #-10
+	LD, R2, NEG_1;
+	AND, R4, R4, #0; Reset R4 for counter
+	ADD, R4, R4, #-1; Counter start = #-1
+	AND, R6, R6, #0; Reset R6 for counter
+
+TENTHS_EVEN
+	ADD, R4, R4, #1; Counter++
+	ADD, R1, R5, R1; EVEN - 10
+	BRp TENTHS_EVEN; Loops until all tenths are gone
+	BRz ONES_EVEN
+	BRn FIX_EVEN
+; R4 now has tenths values
+
+FIX_EVEN	
+	ADD, R1, R1, #10
+
+	BRnzp ONES_EVEN
+
+ONES_EVEN
+	ADD, R6, R6, #0; Counter++
+	ADD, R1, R2, R1; EVEN - 1
+	BRp ONES_EVEN
+
+;R6 now has ones values
+	BRnzp PRINT_EVEN
+
+PRINT_EVEN
+	ADD, R4, R4, #12
+	ADD, R4, R4, #12
+	ADD, R4, R4, #12
+	ADD, R4, R4, #12; ASCII value of TENTHS
+	ADD, R6, R6, #12
+	ADD, R6, R6, #12
+	ADD, R6, R6, #12
+	ADD, R6, R6, #12; ASCII value of ONES
+	ST, R4, EVEN;
+	AND, R0, R0, #0; Reset R0
+	LEA, R0, EVEN_PROMPT
+	PUTS
+	AND, R0, R0, #0; Reset R0
+	LD, R0, EVEN;
+	OUT
+	ST, R6, EVEN
+	AND, R0, R0, #0; Reset R0
+	LD, R0, EVEN
+	OUT
+	BRnzp DONE
+
+DONE
+	HALT
  
 SUM .blkw #1
 EVEN .blkw #1
@@ -145,8 +282,9 @@ NEG_0 .fill #-48
 NEG_9 .fill #-57
 NEG_1 .fill #-1
 NEG_10 .fill #-10
-VSAVE_R7 .blkw #1
-VSAVE_R1 .blkw #1
 
+SUM_PROMPT .stringz  "Sum of all inputs values = "
+ODD_PROMPT .stringz "Sum of all odd input values = "
+EVEN_PROMPT .stringz "Sum of all even input values = "
 
 .end

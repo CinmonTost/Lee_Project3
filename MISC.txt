@@ -1,13 +1,51 @@
-Put at the end of OUTPUT:
-
-TENTHS
-	ADD, R4, R4, #1; increment counter
-	ADD, R1, R1, R5; adds #-10 to R1
+OUTPUT_EVEN
 	
-	BRp TENTHS
+	LD, R1, EVEN
 	LD, R5, NEG_10; R5 = #-10
-	BRnz ONES
+	LD, R2, NEG_1;
+	AND, R4, R4, #0; Reset R4 for counter
+	ADD, R4, R4, #-1; Counter start = #-1
+	AND, R6, R6, #0; Reset R6 for counter
 
-ONES
-	ADD, R6, R6, #1; increment counter
+TENTHS_EVEN
+	ADD, R4, R4, #1; Counter++
+	ADD, R1, R5, R1; EVEN - 10
+	BRp TENTHS_EVEN; Loops until all tenths are gone
+	BRz ONES_EVEN
+	BRn FIX_EVEN
+; R4 now has tenths values
+
+FIX_EVEN	
+	ADD, R1, R1, #10
+
+	BRnzp ONES_EVEN
+
+ONES_EVEN
+	ADD, R6, R6, #1; Counter++
+	ADD, R1, R2, R1; EVEN - 1
+	BRp ONES_EVEN
+
+;R6 now has ones values
+	BRnzp PRINT_EVEN
+
+PRINT_EVEN
+	ADD, R4, R4, #12
+	ADD, R4, R4, #12
+	ADD, R4, R4, #12
+	ADD, R4, R4, #12; ASCII value of TENTHS
+	ADD, R6, R6, #12
+	ADD, R6, R6, #12
+	ADD, R6, R6, #12
+	ADD, R6, R6, #12; ASCII value of ONES
+	ST, R4, EVEN;
+	AND, R0, R0, #0; Reset R0
+	LEA, R0, EVEN_PROMPT
+	PUTS
+	AND, R0, R0, #0; Reset R0
+	LD, R0, EVEN;
+	OUT
+	ST, R6, EVEN
+	AND, R0, R0, #0; Reset R0
+	LD, R0, EVEN
+	OUT
 	BRnzp DONE
