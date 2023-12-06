@@ -47,6 +47,7 @@ AGAIN
 NO_GOOD 
 	LD R0, 	NEWLINE
 	OUT
+	OUT
 	LEA R0, ERROR
 	PUTS
 	ADD R1, R1, #0
@@ -58,7 +59,7 @@ VALIDATE
 	
 	AND R5, R5, #0	; Resetting R5
 
-	LD R1, NEG_0
+	LD R1, NEG_0; R1 = #-48
 	ADD R1, R0, R1; checking whether value is >= 0. If less than 0, then flag will be negative
 	BRn BAD
 	LD R1, NEG_9
@@ -70,6 +71,7 @@ VSAVE_R7 .blkw #1
 VSAVE_R1 .blkw #1
 
 BAD	
+	AND, R0, R0, #0
 	ADD R5, R5, #1; sets flag to P to branch to NO_GOOD
 GOOD	 
 
@@ -79,10 +81,17 @@ GOOD
 	ADD, R0, R0, #-16
 	ADD, R0, R0, #-16; turn ASCII into int
 	; Turn ASCII value into an integer
+	BRzp ADD_SUM
+	BRn RETURN
+
+ADD_SUM
 	ADD, R6, R0, R6; Adds integer value to SUM register = R6
 	AND, R3, R0, #1; Checks if odd. If P then odd, if Z then even.
 	BRz, #1; if even, skips adding to register. If odd continue.
 	ADD, R4, R0, R4; Add integer value to ODD register = R4
+	RET
+
+RETURN
 	RET
 
 LEFTSQBR .fill x005B
