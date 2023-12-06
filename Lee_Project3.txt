@@ -1,11 +1,11 @@
 ;Write an LC-3 assembly program that will retrieve 5 digits from the keyboard.
-; R0 = TRAPS
-; R1 = SUM
-; R2 = ODD
-; R3 = EVEN
-; R4 = COUNTER for tens
-; R5 = NEG_10
-; R6 = COUNTER for ones
+; R0 = 
+; R1 = 
+; R2 = 
+; R3 = 
+; R4 = ODD
+; R5 = EVEN
+; R6 = SUM
 ; R7 = 
 
 .orig x3000; start at x3000
@@ -76,7 +76,7 @@ GOOD
 	LD R1, VSAVE_R1
 	ADD, R0, R0, #-16
 	ADD, R0, R0, #-16
-	ADD, R0, R0, #-16; ASCII MASK
+	ADD, R0, R0, #-16; turn ASCII into int
 	; Turn ASCII value into an integer
 	ADD, R6, R0, R6; Adds integer value to SUM register = R6
 	AND, R3, R0, #1; Checks if odd. If P then odd, if Z then even.
@@ -88,11 +88,12 @@ LEFTSQBR .fill x005B
 RIGHTSQBR .fill x005D
 COLON .fill x003A
 NEWLINE .fill x000A
+.fill #0
 COUNT .fill #5
 ZERO .fill x0030
 
-ERROR .stringz "Invalid input. Input between 0 - 9. Try again..."
 PROMPT .stringz "Enter 5 digits... "
+ERROR .stringz "Invalid input. Input between 0 - 9. Try again..."
 
 OUTPUT_SUM 
 	LD, R0, NEWLINE
@@ -129,7 +130,9 @@ FIX_SUM
 
 	BRnzp ONES_SUM
 
-ONES_SUM
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ONES_SUM ; Just print the number no need to use counter and conversion
 	ADD, R6, R6, #1; Counter++
 	ADD, R1, R2, R1; SUM - 1
 	BRp ONES_SUM
@@ -155,11 +158,11 @@ PRINT_SUM
 	ST, R4, SUM;
 	LEA, R0, SUM_PROMPT
 	PUTS
-	LEA, R0, SUM;
-	PUTS
+	LD, R0, SUM;
+	OUT
 	ST, R6, SUM
-	LEA, R0, SUM
-	PUTS
+	LD, R0, SUM
+	OUT
 	LD R0, 	NEWLINE
 	OUT
 	OUT
