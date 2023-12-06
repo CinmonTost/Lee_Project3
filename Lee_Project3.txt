@@ -71,7 +71,8 @@ VSAVE_R1 .blkw #1
 
 BAD	
 	ADD R5, R5, #1; sets flag to P to branch to NO_GOOD
-GOOD	
+GOOD	 
+
 	LD R7, VSAVE_R7
 	LD R1, VSAVE_R1
 	ADD, R0, R0, #-16
